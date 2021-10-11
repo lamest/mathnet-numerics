@@ -42,7 +42,7 @@ namespace MathNet.Numerics.Data.Matlab
     /// <summary>
     /// Format a MATLAB file.
     /// </summary>
-    internal static class Formatter
+    public static class Formatter
     {
         /// <summary>
         /// The file header value
@@ -98,9 +98,44 @@ namespace MathNet.Numerics.Data.Matlab
         }
 
         /// <summary>
+        /// Writes only .mat header.
+        /// </summary>
+        /// <param name="writer"></param>
+        public static void WriteHeader(BinaryWriter writer)
+        {
+            // write header and subsystem data offset (116+8 bytes)
+            var header = Encoding.ASCII.GetBytes(HeaderText + DateTime.UtcNow.ToString("ddd MMM dd HH: mm:ss yyyy"));
+            writer.Write(header);
+            Pad(writer, 116 - header.Length + 8, 32);
+
+            // write version (2 bytes)
+            writer.Write((short)0x100);
+
+            // write little endian indicator (2 bytes)
+            writer.Write((byte)0x49);
+            writer.Write((byte)0x4D);
+        }
+
+        /// <summary>
+        /// Append a stream with matrix blocks.
+        /// </summary>
+        public static void AppendFile(BinaryWriter writer, MatlabMatrix matrix)
+        {
+            // write data type
+            writer.Write((int)DataType.Compressed);
+
+            // compress data
+            var compressedData = PackCompressedBlock(matrix.Data, DataType.Matrix);
+
+            // write compressed data to file
+            writer.Write(compressedData.Length);
+            writer.Write(compressedData);
+        }
+
+        /// <summary>
         /// Format a matrix block byte array
         /// </summary>
-        internal static MatlabMatrix FormatMatrix<T>(Matrix<T> matrix, string name)
+        public static MatlabMatrix FormatMatrix<T>(Matrix<T> matrix, string name)
             where T : struct, IEquatable<T>, IFormattable
         {
             if (matrix == null)
