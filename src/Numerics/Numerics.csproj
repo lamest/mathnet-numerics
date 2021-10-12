@@ -37,6 +37,7 @@ Control.Describe now includes CPU architecture and family identifier if know</Pa
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
     <NoWarn>1701;1702;1705;1591;1573</NoWarn>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
     <Reference Include="System" />
